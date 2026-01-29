@@ -12,6 +12,7 @@ import StepDesign from "./StepDesign";
 import StepReview from "./StepReview";
 import { ChevronLeft, ChevronRight, Save } from "lucide-react";
 import { useUnsaved } from "@/lib/unsaved-context";
+import { toast } from "sonner";
 
 const STEP_LABELS = ["Basics", "Features", "Tech", "Design", "Review"];
 
@@ -45,13 +46,22 @@ export default function WizardContainer({ projectId }: Props) {
     };
   }, [setDirty]);
 
+  const [draftId, setDraftId] = useState<string | null>(null);
+
   const handleSaveDraft = () => {
-    const draft = createDraft();
-    draft.wizardData = data;
-    draft.currentStep = step;
-    saveDraft(draft);
+    if (draftId) {
+      // Update existing draft
+      saveDraft({ id: draftId, wizardData: data, currentStep: step, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
+    } else {
+      // Create new draft
+      const draft = createDraft();
+      draft.wizardData = data;
+      draft.currentStep = step;
+      saveDraft(draft);
+      setDraftId(draft.id);
+    }
     setDirty(false);
-    router.push("/drafts");
+    toast.success("Draft saved");
   };
 
   useEffect(() => {
