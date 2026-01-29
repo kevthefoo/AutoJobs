@@ -6,7 +6,7 @@ import { getTechTemplates, deleteTechTemplate, saveTechTemplate } from "@/lib/st
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Trash2, Pencil } from "lucide-react";
+import { Trash2, Pencil, ChevronDown, ChevronRight } from "lucide-react";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import StepTech from "@/components/wizard/StepTech";
 import { toast } from "sonner";
@@ -28,6 +28,7 @@ const FIELD_LABELS: Record<string, string> = {
 export default function TemplatesPage() {
     const [templates, setTemplates] = useState<TechTemplate[]>([]);
     const [deleteId, setDeleteId] = useState<string | null>(null);
+    const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editName, setEditName] = useState("");
     const [editDesc, setEditDesc] = useState("");
@@ -36,6 +37,14 @@ export default function TemplatesPage() {
     useEffect(() => {
         setTemplates(getTechTemplates());
     }, []);
+
+    const toggleExpand = (id: string) => {
+        setExpandedIds((prev) => {
+            const next = new Set(prev);
+            if (next.has(id)) next.delete(id); else next.add(id);
+            return next;
+        });
+    };
 
     const handleDelete = (id: string) => {
         setDeleteId(id);
@@ -114,11 +123,14 @@ export default function TemplatesPage() {
                         ) : (
                             <div key={t.id} className="border rounded-lg p-4 space-y-3 hover:border-primary/40 transition-colors">
                                 <div className="flex items-start justify-between">
-                                    <div>
-                                        <h3 className="font-semibold text-lg">{t.name}</h3>
-                                        {t.description && (
-                                            <p className="text-sm text-muted-foreground">{t.description}</p>
-                                        )}
+                                    <div className="flex items-center gap-2 cursor-pointer select-none" onClick={() => toggleExpand(t.id)}>
+                                        {expandedIds.has(t.id) ? <ChevronDown className="w-4 h-4 text-muted-foreground" /> : <ChevronRight className="w-4 h-4 text-muted-foreground" />}
+                                        <div>
+                                            <h3 className="font-semibold text-lg">{t.name}</h3>
+                                            {t.description && (
+                                                <p className="text-sm text-muted-foreground">{t.description}</p>
+                                            )}
+                                        </div>
                                     </div>
                                     <div className="flex gap-1">
                                         <Button variant="ghost" size="icon" onClick={() => startEdit(t)}>
@@ -129,23 +141,29 @@ export default function TemplatesPage() {
                                         </Button>
                                     </div>
                                 </div>
-                                <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
-                                    {Object.entries(FIELD_LABELS).map(([key, label]) => {
-                                        const values = t.tech[key as keyof typeof t.tech] as string[];
-                                        if (!values || values.length === 0) return null;
-                                        return (
-                                            <div key={key}>
-                                                <span className="text-muted-foreground">{label}:</span>{" "}
-                                                {values.map((v) => (
-                                                    <Badge key={v} variant="secondary" className="mr-1 mb-1 text-xs">{v}</Badge>
-                                                ))}
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                                <p className="text-xs text-muted-foreground">
-                                    Created {new Date(t.createdAt).toLocaleDateString()}
-                                </p>
+                                {expandedIds.has(t.id) && (
+                                    <>
+                                        <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm items-start">
+                                            {Object.entries(FIELD_LABELS).map(([key, label]) => {
+                                                const values = t.tech[key as keyof typeof t.tech] as string[];
+                                                if (!values || values.length === 0) return null;
+                                                return (
+                                                    <div key={key} className="contents">
+                                                        <span className="text-muted-foreground whitespace-nowrap pt-0.5">{label}</span>
+                                                        <div className="flex flex-wrap gap-1">
+                                                            {values.map((v) => (
+                                                                <Badge key={v} variant="secondary" className="text-xs">{v}</Badge>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                        <p className="text-xs text-muted-foreground">
+                                            Created {new Date(t.createdAt).toLocaleDateString()}
+                                        </p>
+                                    </>
+                                )}
                             </div>
                         )
                     )}
