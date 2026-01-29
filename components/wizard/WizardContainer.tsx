@@ -3,14 +3,14 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { WizardData, DEFAULT_WIZARD_DATA, DocType } from "@/lib/types";
-import { createProject, saveProject, getProject } from "@/lib/storage";
+import { createProject, saveProject, getProject, createDraft, saveDraft } from "@/lib/storage";
 import { Button } from "@/components/ui/button";
 import StepBasics from "./StepBasics";
 import StepFeatures from "./StepFeatures";
 import StepTech from "./StepTech";
 import StepDesign from "./StepDesign";
 import StepReview from "./StepReview";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Save } from "lucide-react";
 
 const STEP_LABELS = ["Basics", "Features", "Tech", "Design", "Review"];
 
@@ -24,6 +24,14 @@ export default function WizardContainer({ projectId }: Props) {
   const [data, setData] = useState<WizardData>(DEFAULT_WIZARD_DATA);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState("");
+
+  const handleSaveDraft = () => {
+    const draft = createDraft();
+    draft.wizardData = data;
+    draft.currentStep = step;
+    saveDraft(draft);
+    router.push("/drafts");
+  };
 
   useEffect(() => {
     if (projectId) {
@@ -70,8 +78,11 @@ export default function WizardContainer({ projectId }: Props) {
   return (
     <div className="max-w-3xl mx-auto py-8 px-4">
       {/* Header */}
-      <div className="mb-8">
+      <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold">New Project</h1>
+        <Button variant="outline" size="sm" onClick={handleSaveDraft}>
+          <Save className="w-4 h-4 mr-1" /> Save as Draft
+        </Button>
       </div>
 
       {/* Step Indicator */}

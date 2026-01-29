@@ -6,6 +6,8 @@ import { getTechTemplates, deleteTechTemplate } from "@/lib/storage";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Trash2 } from "lucide-react";
+import ConfirmDialog from "@/components/ConfirmDialog";
+import { toast } from "sonner";
 
 const FIELD_LABELS: Record<string, string> = {
     language: "Language",
@@ -23,14 +25,22 @@ const FIELD_LABELS: Record<string, string> = {
 
 export default function TemplatesPage() {
     const [templates, setTemplates] = useState<TechTemplate[]>([]);
+    const [deleteId, setDeleteId] = useState<string | null>(null);
 
     useEffect(() => {
         setTemplates(getTechTemplates());
     }, []);
 
     const handleDelete = (id: string) => {
-        deleteTechTemplate(id);
+        setDeleteId(id);
+    };
+
+    const confirmDelete = () => {
+        if (!deleteId) return;
+        deleteTechTemplate(deleteId);
         setTemplates(getTechTemplates());
+        setDeleteId(null);
+        toast.success("Template deleted");
     };
 
     return (
@@ -85,6 +95,13 @@ export default function TemplatesPage() {
                     ))}
                 </div>
             )}
+            <ConfirmDialog
+                open={!!deleteId}
+                title="Delete template?"
+                description="This action cannot be undone."
+                onConfirm={confirmDelete}
+                onCancel={() => setDeleteId(null)}
+            />
         </div>
     );
 }

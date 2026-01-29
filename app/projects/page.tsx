@@ -4,20 +4,30 @@ import { useEffect, useState } from "react";
 import { Project } from "@/lib/types";
 import { getProjects, deleteProject } from "@/lib/storage";
 import ProjectCard from "@/components/ProjectCard";
+import ConfirmDialog from "@/components/ConfirmDialog";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Plus } from "lucide-react";
+import { toast } from "sonner";
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
     setProjects(getProjects());
   }, []);
 
   const handleDelete = (id: string) => {
-    deleteProject(id);
+    setDeleteId(id);
+  };
+
+  const confirmDelete = () => {
+    if (!deleteId) return;
+    deleteProject(deleteId);
     setProjects(getProjects());
+    setDeleteId(null);
+    toast.success("Project deleted");
   };
 
   return (
@@ -46,6 +56,13 @@ export default function ProjectsPage() {
           ))}
         </div>
       )}
+      <ConfirmDialog
+        open={!!deleteId}
+        title="Delete project?"
+        description="This action cannot be undone."
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteId(null)}
+      />
     </div>
   );
 }

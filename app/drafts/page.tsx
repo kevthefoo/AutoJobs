@@ -8,12 +8,15 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Trash2, FileEdit } from "lucide-react";
 import Link from "next/link";
+import ConfirmDialog from "@/components/ConfirmDialog";
+import { toast } from "sonner";
 
 const STEP_LABELS = ["Basics", "Features", "Tech", "Design", "Review"];
 
 export default function DraftsPage() {
   const router = useRouter();
   const [drafts, setDrafts] = useState<Draft[]>([]);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
     setDrafts(getDrafts());
@@ -25,8 +28,15 @@ export default function DraftsPage() {
   };
 
   const handleDelete = (id: string) => {
-    deleteDraft(id);
+    setDeleteId(id);
+  };
+
+  const confirmDelete = () => {
+    if (!deleteId) return;
+    deleteDraft(deleteId);
     setDrafts(getDrafts());
+    setDeleteId(null);
+    toast.success("Draft deleted");
   };
 
   return (
@@ -68,6 +78,13 @@ export default function DraftsPage() {
           ))}
         </div>
       )}
+      <ConfirmDialog
+        open={!!deleteId}
+        title="Delete draft?"
+        description="This action cannot be undone."
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteId(null)}
+      />
     </div>
   );
 }

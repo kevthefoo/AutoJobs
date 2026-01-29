@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Trash2, X } from "lucide-react";
+import ConfirmDialog from "@/components/ConfirmDialog";
+import { toast } from "sonner";
 
 export default function IdeasPage() {
   const [ideas, setIdeas] = useState<Idea[]>([]);
@@ -14,6 +16,7 @@ export default function IdeasPage() {
   const [newTitle, setNewTitle] = useState("");
   const [newContent, setNewContent] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
     setIdeas(getIdeas());
@@ -29,8 +32,15 @@ export default function IdeasPage() {
   };
 
   const handleDelete = (id: string) => {
-    deleteIdea(id);
+    setDeleteId(id);
+  };
+
+  const confirmDelete = () => {
+    if (!deleteId) return;
+    deleteIdea(deleteId);
     setIdeas(getIdeas());
+    setDeleteId(null);
+    toast.success("Idea deleted");
   };
 
   const handleUpdate = (idea: Idea) => {
@@ -103,6 +113,13 @@ export default function IdeasPage() {
           ))}
         </div>
       )}
+      <ConfirmDialog
+        open={!!deleteId}
+        title="Delete idea?"
+        description="This action cannot be undone."
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteId(null)}
+      />
     </div>
   );
 }
