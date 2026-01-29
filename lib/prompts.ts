@@ -1,11 +1,13 @@
 import { WizardData } from "./types";
 
 const AI_DECIDE = "__AI_Decide__";
+const SKIP = "__Skip__";
 
 function formatTechField(values: string[]): string {
+    if (values.includes(SKIP)) return "Not needed for this project";
     if (values.includes(AI_DECIDE))
         return "Let AI decide the most suitable option";
-    const clean = values.filter((v) => v !== AI_DECIDE);
+    const clean = values.filter((v) => v !== AI_DECIDE && v !== SKIP);
     return clean.length > 0 ? clean.join(", ") : "Not specified";
 }
 

@@ -170,6 +170,7 @@ interface CheckboxGroupProps {
 }
 
 const AI_DECIDE = "__AI_Decide__";
+const SKIP = "__Skip__";
 
 function CheckboxGroup({
     label,
@@ -178,8 +179,9 @@ function CheckboxGroup({
     onChange,
 }: CheckboxGroupProps) {
     const isAiDecide = selected.includes(AI_DECIDE);
+    const isSkipped = selected.includes(SKIP);
     const customValues = selected.filter(
-        (s) => !options.includes(s) && s !== AI_DECIDE,
+        (s) => !options.includes(s) && s !== AI_DECIDE && s !== SKIP,
     );
     const [showOther, setShowOther] = useState(customValues.length > 0);
     const [otherText, setOtherText] = useState(customValues.join(", "));
@@ -195,8 +197,18 @@ function CheckboxGroup({
         }
     };
 
+    const toggleSkip = () => {
+        if (isSkipped) {
+            onChange([]);
+        } else {
+            onChange([SKIP]);
+            setShowOther(false);
+            setOtherText("");
+        }
+    };
+
     const toggle = (option: string) => {
-        if (isAiDecide) return;
+        if (isAiDecide || isSkipped) return;
         onChange(
             selected.includes(option)
                 ? selected.filter((s) => s !== option)
@@ -205,7 +217,7 @@ function CheckboxGroup({
     };
 
     const handleOtherToggle = () => {
-        if (isAiDecide) return;
+        if (isAiDecide || isSkipped) return;
         if (showOther) {
             onChange(selected.filter((s) => options.includes(s)));
             setOtherText("");
@@ -225,14 +237,18 @@ function CheckboxGroup({
         onChange([...knownSelected, ...customs]);
     };
 
-    const displayValues = isAiDecide
-        ? "AI will decide"
-        : selected.filter((s) => s !== AI_DECIDE).join(", ") || "None selected";
+    const displayValues = isSkipped
+        ? "Skipped"
+        : isAiDecide
+          ? "AI will decide"
+          : selected.filter((s) => s !== AI_DECIDE && s !== SKIP).join(", ") || "None selected";
 
     if (confirmed) {
-        const items = isAiDecide
-            ? ["AI will decide"]
-            : selected.filter((s) => s !== AI_DECIDE);
+        const items = isSkipped
+            ? ["Skipped — not needed"]
+            : isAiDecide
+              ? ["AI will decide"]
+              : selected.filter((s) => s !== AI_DECIDE && s !== SKIP);
         return (
             <div className="space-y-2">
                 <div className="flex items-center justify-between">
@@ -270,46 +286,59 @@ function CheckboxGroup({
         <div className="space-y-3">
             <Label>{label}</Label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <label className="flex items-center gap-2 px-3 py-2 rounded-md border cursor-pointer transition-colors hover:bg-accent text-sm col-span-1 sm:col-span-2 bg-primary/5 border-primary/20">
+                <label className={`flex items-center gap-2 px-3 py-2 rounded-md border cursor-pointer transition-colors text-sm col-span-1 sm:col-span-2 bg-primary/5 border-primary/20 ${isSkipped ? "opacity-40 cursor-not-allowed" : "hover:bg-accent"}`}>
                     <input
                         type="checkbox"
                         checked={isAiDecide}
                         onChange={toggleAiDecide}
+                        disabled={isSkipped}
                         className="h-4 w-4 rounded border-input accent-primary"
                     />
                     <span className="text-primary font-medium">
                         Let AI decide for me
                     </span>
                 </label>
+                <label className={`flex items-center gap-2 px-3 py-2 rounded-md border cursor-pointer transition-colors text-sm col-span-1 sm:col-span-2 bg-muted/50 border-muted-foreground/20 ${isAiDecide ? "opacity-40 cursor-not-allowed" : "hover:bg-accent"}`}>
+                    <input
+                        type="checkbox"
+                        checked={isSkipped}
+                        onChange={toggleSkip}
+                        disabled={isAiDecide}
+                        className="h-4 w-4 rounded border-input accent-primary"
+                    />
+                    <span className="text-muted-foreground font-medium">
+                        Skip — not needed for this project
+                    </span>
+                </label>
                 {options.map((option) => (
                     <label
                         key={option}
-                        className={`flex items-center gap-2 px-3 py-2 rounded-md border cursor-pointer transition-colors text-sm ${isAiDecide ? "opacity-40 cursor-not-allowed" : "hover:bg-accent"}`}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-md border cursor-pointer transition-colors text-sm ${isAiDecide || isSkipped ? "opacity-40 cursor-not-allowed" : "hover:bg-accent"}`}
                     >
                         <input
                             type="checkbox"
                             checked={selected.includes(option)}
                             onChange={() => toggle(option)}
-                            disabled={isAiDecide}
+                            disabled={isAiDecide || isSkipped}
                             className="h-4 w-4 rounded border-input accent-primary"
                         />
                         {option}
                     </label>
                 ))}
                 <label
-                    className={`flex items-center gap-2 px-3 py-2 rounded-md border cursor-pointer transition-colors text-sm ${isAiDecide ? "opacity-40 cursor-not-allowed" : "hover:bg-accent"}`}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-md border cursor-pointer transition-colors text-sm ${isAiDecide || isSkipped ? "opacity-40 cursor-not-allowed" : "hover:bg-accent"}`}
                 >
                     <input
                         type="checkbox"
                         checked={showOther}
                         onChange={handleOtherToggle}
-                        disabled={isAiDecide}
+                        disabled={isAiDecide || isSkipped}
                         className="h-4 w-4 rounded border-input accent-primary"
                     />
                     Other
                 </label>
             </div>
-            {showOther && !isAiDecide && (
+            {showOther && !isAiDecide && !isSkipped && (
                 <Input
                     placeholder="Enter custom values, comma-separated..."
                     value={otherText}
