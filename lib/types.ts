@@ -37,6 +37,7 @@ export interface ProjectFeatures {
 }
 
 export interface ProjectTech {
+  language: string[];
   framework: string[];
   uiux: string[];
   database: string[];
@@ -110,6 +111,7 @@ export const DEFAULT_WIZARD_DATA: WizardData = {
     userFlows: [],
   },
   tech: {
+    language: [],
     framework: [],
     uiux: [],
     database: [],

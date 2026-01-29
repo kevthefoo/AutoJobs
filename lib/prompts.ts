@@ -34,6 +34,7 @@ ${data.features.personas.map((p) => `- **${p.name}**: ${p.description}`).join("\
 ${data.features.userFlows.map((f) => `### ${f.title}\n${f.steps}`).join("\n\n") || "- None specified"}
 
 ## Technical Preferences
+- **Programming Language**: ${formatTechField(data.tech.language)}
 - **Framework**: ${formatTechField(data.tech.framework)}
 - **UI/UX**: ${formatTechField(data.tech.uiux)}
 - **Database**: ${formatTechField(data.tech.database)}

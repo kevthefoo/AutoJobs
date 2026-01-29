@@ -6,7 +6,25 @@ import { getTechTemplates, createTechTemplate } from "@/lib/storage";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { ChevronDown, Save } from "lucide-react";
+
+const LANGUAGE_OPTIONS = [
+    "TypeScript",
+    "JavaScript",
+    "Python",
+    "PHP",
+    "Java",
+    "C#",
+    "Go",
+    "Rust",
+    "Ruby",
+    "Kotlin",
+    "Swift",
+    "Dart",
+    "Elixir",
+    "Scala",
+];
 
 const FRAMEWORK_OPTIONS = [
     "React",
@@ -165,6 +183,7 @@ function CheckboxGroup({
     );
     const [showOther, setShowOther] = useState(customValues.length > 0);
     const [otherText, setOtherText] = useState(customValues.join(", "));
+    const [confirmed, setConfirmed] = useState(false);
 
     const toggleAiDecide = () => {
         if (isAiDecide) {
@@ -205,6 +224,31 @@ function CheckboxGroup({
             .filter(Boolean);
         onChange([...knownSelected, ...customs]);
     };
+
+    const displayValues = isAiDecide
+        ? "AI will decide"
+        : selected.filter((s) => s !== AI_DECIDE).join(", ") || "None selected";
+
+    if (confirmed) {
+        const items = isAiDecide
+            ? ["AI will decide"]
+            : selected.filter((s) => s !== AI_DECIDE);
+        return (
+            <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                    <Label>{label}</Label>
+                    <Button variant="ghost" size="sm" onClick={() => setConfirmed(false)}>Edit</Button>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                    {items.length > 0 ? items.map((v) => (
+                        <Badge key={v} variant="secondary" className="text-xs">{v}</Badge>
+                    )) : (
+                        <span className="text-sm text-muted-foreground">None selected</span>
+                    )}
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-3">
@@ -256,6 +300,9 @@ function CheckboxGroup({
                     onChange={(e) => handleOtherChange(e.target.value)}
                 />
             )}
+            <Button size="sm" onClick={() => setConfirmed(true)}>
+                Confirm
+            </Button>
         </div>
     );
 }
@@ -271,6 +318,7 @@ const TEMPLATES: Template[] = [
         name: "Next.js Full-Stack",
         description: "Next.js + Tailwind + Supabase + Vercel",
         tech: {
+            language: ["TypeScript"],
             framework: ["React", "Next.js"],
             uiux: ["Tailwind CSS", "Shadcn/ui"],
             database: ["Supabase", "Prisma ORM"],
@@ -287,6 +335,7 @@ const TEMPLATES: Template[] = [
         name: "MERN Stack",
         description: "React + Express + MongoDB + Docker",
         tech: {
+            language: ["JavaScript"],
             framework: ["React", "Node.js", "Express"],
             uiux: ["Tailwind CSS"],
             database: ["MongoDB"],
@@ -303,6 +352,7 @@ const TEMPLATES: Template[] = [
         name: "Laravel + Vue",
         description: "Laravel + Vue + MySQL + Docker",
         tech: {
+            language: ["PHP", "JavaScript"],
             framework: ["Laravel", "Vue"],
             uiux: ["Tailwind CSS"],
             database: ["MySQL", "Redis"],
@@ -319,6 +369,7 @@ const TEMPLATES: Template[] = [
         name: "Django + React",
         description: "Django + React + PostgreSQL + AWS",
         tech: {
+            language: ["Python", "TypeScript"],
             framework: ["Django", "React"],
             uiux: ["Material UI"],
             database: ["PostgreSQL", "Redis"],
@@ -335,6 +386,7 @@ const TEMPLATES: Template[] = [
         name: "Next.js + Firebase",
         description: "Next.js + Firebase + Vercel",
         tech: {
+            language: ["TypeScript"],
             framework: ["React", "Next.js"],
             uiux: ["Tailwind CSS", "Shadcn/ui"],
             database: ["Firebase"],
@@ -351,6 +403,7 @@ const TEMPLATES: Template[] = [
         name: "SaaS Starter",
         description: "Next.js + Clerk + Neon + Stripe",
         tech: {
+            language: ["TypeScript"],
             framework: ["React", "Next.js"],
             uiux: ["Tailwind CSS", "Shadcn/ui"],
             database: ["Neon", "Drizzle ORM"],
@@ -372,7 +425,15 @@ interface Props {
 
 export default function StepTech({ data, onChange }: Props) {
     const [showTemplates, setShowTemplates] = useState(false);
+    const [showSave, setShowSave] = useState(false);
+    const [saveName, setSaveName] = useState("");
+    const [saveDesc, setSaveDesc] = useState("");
+    const [userTemplates, setUserTemplates] = useState<TechTemplate[]>([]);
     const dropdownRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        setUserTemplates(getTechTemplates());
+    }, []);
 
     useEffect(() => {
         const handleClick = (e: MouseEvent) => {
@@ -384,39 +445,101 @@ export default function StepTech({ data, onChange }: Props) {
         return () => document.removeEventListener("mousedown", handleClick);
     }, []);
 
-    const applyTemplate = (template: Template) => {
-        onChange(template.tech);
+    const applyTemplate = (tech: ProjectTech) => {
+        onChange(tech);
         setShowTemplates(false);
+    };
+
+    const handleSaveTemplate = () => {
+        if (!saveName.trim()) return;
+        createTechTemplate(saveName.trim(), saveDesc.trim(), data);
+        setUserTemplates(getTechTemplates());
+        setSaveName("");
+        setSaveDesc("");
+        setShowSave(false);
     };
 
     return (
         <div className="space-y-8">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-2">
                 <h2 className="text-2xl font-bold">Technical Preferences</h2>
-                <div className="relative" ref={dropdownRef}>
+                <div className="flex gap-2">
                     <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setShowTemplates(!showTemplates)}
+                        onClick={() => setShowSave(!showSave)}
                     >
-                        Use a template <ChevronDown className="w-4 h-4 ml-1" />
+                        <Save className="w-4 h-4 mr-1" /> Save as template
                     </Button>
-                    {showTemplates && (
-                        <div className="absolute right-0 top-full mt-2 w-72 bg-card border rounded-lg shadow-lg z-50 py-1">
-                            {TEMPLATES.map((t) => (
-                                <button
-                                    key={t.name}
-                                    onClick={() => applyTemplate(t)}
-                                    className="w-full text-left px-4 py-3 hover:bg-accent transition-colors"
-                                >
-                                    <div className="text-sm font-medium">{t.name}</div>
-                                    <div className="text-xs text-muted-foreground">{t.description}</div>
-                                </button>
-                            ))}
-                        </div>
-                    )}
+                    <div className="relative" ref={dropdownRef}>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setShowTemplates(!showTemplates)}
+                        >
+                            Use a template <ChevronDown className="w-4 h-4 ml-1" />
+                        </Button>
+                        {showTemplates && (
+                            <div className="absolute right-0 top-full mt-2 w-72 bg-card border rounded-lg shadow-lg z-50 py-1 max-h-96 overflow-y-auto">
+                                {userTemplates.length > 0 && (
+                                    <>
+                                        <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wide">My Templates</div>
+                                        {userTemplates.map((t) => (
+                                            <button
+                                                key={t.id}
+                                                onClick={() => applyTemplate(t.tech)}
+                                                className="w-full text-left px-4 py-3 hover:bg-accent transition-colors"
+                                            >
+                                                <div className="text-sm font-medium">{t.name}</div>
+                                                {t.description && <div className="text-xs text-muted-foreground">{t.description}</div>}
+                                            </button>
+                                        ))}
+                                        <div className="border-t my-1" />
+                                    </>
+                                )}
+                                <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Presets</div>
+                                {TEMPLATES.map((t) => (
+                                    <button
+                                        key={t.name}
+                                        onClick={() => applyTemplate(t.tech)}
+                                        className="w-full text-left px-4 py-3 hover:bg-accent transition-colors"
+                                    >
+                                        <div className="text-sm font-medium">{t.name}</div>
+                                        <div className="text-xs text-muted-foreground">{t.description}</div>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
+
+            {showSave && (
+                <div className="border rounded-lg p-4 space-y-3">
+                    <h3 className="font-semibold text-sm">Save current selections as template</h3>
+                    <Input
+                        placeholder="Template name"
+                        value={saveName}
+                        onChange={(e) => setSaveName(e.target.value)}
+                    />
+                    <Input
+                        placeholder="Description (optional)"
+                        value={saveDesc}
+                        onChange={(e) => setSaveDesc(e.target.value)}
+                    />
+                    <div className="flex gap-2">
+                        <Button size="sm" onClick={handleSaveTemplate} disabled={!saveName.trim()}>Save</Button>
+                        <Button size="sm" variant="outline" onClick={() => setShowSave(false)}>Cancel</Button>
+                    </div>
+                </div>
+            )}
+
+            <CheckboxGroup
+                label="Programming Language"
+                options={LANGUAGE_OPTIONS}
+                selected={data.language}
+                onChange={(language) => onChange({ ...data, language })}
+            />
 
             <CheckboxGroup
                 label="Framework"

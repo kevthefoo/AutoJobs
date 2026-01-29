@@ -70,6 +70,7 @@ export default function StepReview({ data, onGenerate, isGenerating, onEditStep 
           <Button variant="ghost" size="sm" onClick={() => onEditStep(2)}>Edit</Button>
         </div>
         <div className="text-sm space-y-1">
+          <p><span className="text-muted-foreground">Language:</span> {displayTech(data.tech.language)}</p>
           <p><span className="text-muted-foreground">Framework:</span> {displayTech(data.tech.framework)}</p>
           <p><span className="text-muted-foreground">UI/UX:</span> {displayTech(data.tech.uiux)}</p>
           <p><span className="text-muted-foreground">Database:</span> {displayTech(data.tech.database)}</p>
