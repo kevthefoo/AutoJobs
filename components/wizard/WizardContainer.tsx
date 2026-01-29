@@ -11,6 +11,7 @@ import StepTech from "./StepTech";
 import StepDesign from "./StepDesign";
 import StepReview from "./StepReview";
 import { ChevronLeft, ChevronRight, Save } from "lucide-react";
+import { useUnsaved } from "@/lib/unsaved-context";
 
 const STEP_LABELS = ["Basics", "Features", "Tech", "Design", "Review"];
 
@@ -24,12 +25,32 @@ export default function WizardContainer({ projectId }: Props) {
   const [data, setData] = useState<WizardData>(DEFAULT_WIZARD_DATA);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState("");
+  const { setDirty } = useUnsaved();
+
+  // Track dirty state
+  const updateData = (newData: WizardData) => {
+    setData(newData);
+    setDirty(true);
+  };
+
+  // Warn on browser close/refresh
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => {
+      window.removeEventListener("beforeunload", handler);
+      setDirty(false);
+    };
+  }, [setDirty]);
 
   const handleSaveDraft = () => {
     const draft = createDraft();
     draft.wizardData = data;
     draft.currentStep = step;
     saveDraft(draft);
+    setDirty(false);
     router.push("/drafts");
   };
 
@@ -67,6 +88,7 @@ export default function WizardContainer({ projectId }: Props) {
 
       project.wizardData = data;
       saveProject(project);
+      setDirty(false);
       router.push(`/project/${project.id}`);
     } catch (e: any) {
       setError(e.message || "Something went wrong");
@@ -107,10 +129,10 @@ export default function WizardContainer({ projectId }: Props) {
       {error && <div className="bg-destructive/10 border border-destructive/20 text-destructive rounded-md p-3 mb-4 text-sm">{error}</div>}
 
       {/* Step Content */}
-      {step === 0 && <StepBasics data={data.basics} onChange={(basics) => setData({ ...data, basics })} />}
-      {step === 1 && <StepFeatures data={data.features} onChange={(features) => setData({ ...data, features })} />}
-      {step === 2 && <StepTech data={data.tech} onChange={(tech) => setData({ ...data, tech })} />}
-      {step === 3 && <StepDesign data={data.design} onChange={(design) => setData({ ...data, design })} />}
+      {step === 0 && <StepBasics data={data.basics} onChange={(basics) => updateData({ ...data, basics })} />}
+      {step === 1 && <StepFeatures data={data.features} onChange={(features) => updateData({ ...data, features })} />}
+      {step === 2 && <StepTech data={data.tech} onChange={(tech) => updateData({ ...data, tech })} />}
+      {step === 3 && <StepDesign data={data.design} onChange={(design) => updateData({ ...data, design })} />}
       {step === 4 && <StepReview data={data} onGenerate={handleGenerate} isGenerating={isGenerating} onEditStep={setStep} />}
 
       {/* Navigation */}
