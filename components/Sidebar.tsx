@@ -28,7 +28,7 @@ export default function Sidebar() {
   return (
     <aside className="w-56 border-r bg-card flex flex-col min-h-screen">
       <div className="p-4 border-b">
-        <Link href="/" className="text-lg font-bold" onClick={(e) => handleClick(e, "/")}>App Planner</Link>
+        <Link href="/" className="text-lg font-bold" onClick={(e) => handleClick(e, "/")}>AutoJobs</Link>
       </div>
       <nav className="flex-1 p-3 space-y-1">
         {NAV_ITEMS.map(({ href, label, icon: Icon }) => {

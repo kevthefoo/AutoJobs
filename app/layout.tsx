@@ -8,7 +8,7 @@ import { Toaster } from "sonner";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "App Planner - AI-Powered PRD & TDD Generator",
+  title: "AutoJobs - AI-Powered PRD & TDD Generator",
   description: "Plan any application with AI-generated PRD and TDD documents",
 };
 
