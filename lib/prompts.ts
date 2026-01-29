@@ -1,18 +1,23 @@
 import { WizardData } from "./types";
 
-const AI_DECIDE = "__ai_decide__";
+const AI_DECIDE = "__AI_Decide__";
 
 function formatTechField(values: string[]): string {
-  if (values.includes(AI_DECIDE)) return "Let AI decide the most suitable option";
-  const clean = values.filter((v) => v !== AI_DECIDE);
-  return clean.length > 0 ? clean.join(", ") : "Not specified";
+    if (values.includes(AI_DECIDE))
+        return "Let AI decide the most suitable option";
+    const clean = values.filter((v) => v !== AI_DECIDE);
+    return clean.length > 0 ? clean.join(", ") : "Not specified";
 }
 
 function formatWizardContext(data: WizardData): string {
-  const mustHave = data.features.features.filter((f) => f.priority === "must-have");
-  const niceToHave = data.features.features.filter((f) => f.priority === "nice-to-have");
+    const mustHave = data.features.features.filter(
+        (f) => f.priority === "must-have",
+    );
+    const niceToHave = data.features.features.filter(
+        (f) => f.priority === "nice-to-have",
+    );
 
-  return `
+    return `
 ## Project Information
 - **Name**: ${data.basics.name}
 - **Type**: ${data.basics.appType}
@@ -54,9 +59,12 @@ ${data.features.userFlows.map((f) => `### ${f.title}\n${f.steps}`).join("\n\n") 
 `.trim();
 }
 
-export function getPRDPrompt(data: WizardData): { system: string; user: string } {
-  return {
-    system: `You are a senior product manager. Generate a comprehensive Product Requirements Document (PRD) in Markdown format. The document must be well-structured, detailed, and optimized for consumption by LLMs and developers.
+export function getPRDPrompt(data: WizardData): {
+    system: string;
+    user: string;
+} {
+    return {
+        system: `You are a senior product manager. Generate a comprehensive Product Requirements Document (PRD) in Markdown format. The document must be well-structured, detailed, and optimized for consumption by LLMs and developers.
 
 Output the PRD using this exact structure:
 
@@ -78,13 +86,16 @@ Output the PRD using this exact structure:
 ## Constraints & Assumptions
 
 Be thorough, specific, and actionable. Fill in every section with meaningful content based on the provided project information. If information is missing, make reasonable assumptions and note them.`,
-    user: `Generate a PRD for the following project:\n\n${formatWizardContext(data)}`,
-  };
+        user: `Generate a PRD for the following project:\n\n${formatWizardContext(data)}`,
+    };
 }
 
-export function getTDDPrompt(data: WizardData): { system: string; user: string } {
-  return {
-    system: `You are a senior software architect. Generate a comprehensive Technical Design Document (TDD) in Markdown format. The document must be well-structured, detailed, and optimized for consumption by LLMs and developers.
+export function getTDDPrompt(data: WizardData): {
+    system: string;
+    user: string;
+} {
+    return {
+        system: `You are a senior software architect. Generate a comprehensive Technical Design Document (TDD) in Markdown format. The document must be well-structured, detailed, and optimized for consumption by LLMs and developers.
 
 Output the TDD using this exact structure:
 
@@ -110,6 +121,6 @@ Output the TDD using this exact structure:
 ## Development Phases
 
 Be thorough, specific, and actionable. Provide concrete technical decisions, code structure recommendations, and implementation details. If information is missing, make reasonable technical choices and explain the rationale.`,
-    user: `Generate a TDD for the following project:\n\n${formatWizardContext(data)}`,
-  };
+        user: `Generate a TDD for the following project:\n\n${formatWizardContext(data)}`,
+    };
 }

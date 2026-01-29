@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { TechTemplate } from "@/lib/types";
-import { getTechTemplates, deleteTechTemplate } from "@/lib/storage";
+import { TechTemplate, ProjectTech } from "@/lib/types";
+import { getTechTemplates, deleteTechTemplate, saveTechTemplate } from "@/lib/storage";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trash2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Trash2, Pencil } from "lucide-react";
 import ConfirmDialog from "@/components/ConfirmDialog";
+import StepTech from "@/components/wizard/StepTech";
 import { toast } from "sonner";
 
 const FIELD_LABELS: Record<string, string> = {
@@ -26,6 +28,10 @@ const FIELD_LABELS: Record<string, string> = {
 export default function TemplatesPage() {
     const [templates, setTemplates] = useState<TechTemplate[]>([]);
     const [deleteId, setDeleteId] = useState<string | null>(null);
+    const [editingId, setEditingId] = useState<string | null>(null);
+    const [editName, setEditName] = useState("");
+    const [editDesc, setEditDesc] = useState("");
+    const [editTech, setEditTech] = useState<ProjectTech | null>(null);
 
     useEffect(() => {
         setTemplates(getTechTemplates());
@@ -41,6 +47,29 @@ export default function TemplatesPage() {
         setTemplates(getTechTemplates());
         setDeleteId(null);
         toast.success("Template deleted");
+    };
+
+    const startEdit = (t: TechTemplate) => {
+        setEditingId(t.id);
+        setEditName(t.name);
+        setEditDesc(t.description);
+        setEditTech({ ...t.tech });
+    };
+
+    const cancelEdit = () => {
+        setEditingId(null);
+        setEditTech(null);
+    };
+
+    const saveEdit = () => {
+        if (!editingId || !editTech) return;
+        const t = templates.find((t) => t.id === editingId);
+        if (!t) return;
+        saveTechTemplate({ ...t, name: editName.trim() || t.name, description: editDesc.trim(), tech: editTech });
+        setTemplates(getTechTemplates());
+        setEditingId(null);
+        setEditTech(null);
+        toast.success("Template updated");
     };
 
     return (
@@ -61,38 +90,65 @@ export default function TemplatesPage() {
                 </div>
             ) : (
                 <div className="space-y-4">
-                    {templates.map((t) => (
-                        <div key={t.id} className="border rounded-lg p-4 space-y-3 hover:border-primary/40 transition-colors">
-                            <div className="flex items-start justify-between">
-                                <div>
-                                    <h3 className="font-semibold text-lg">{t.name}</h3>
-                                    {t.description && (
-                                        <p className="text-sm text-muted-foreground">{t.description}</p>
-                                    )}
+                    {templates.map((t) =>
+                        editingId === t.id && editTech ? (
+                            <div key={t.id} className="border rounded-lg p-4 space-y-4 border-primary/40">
+                                <div className="space-y-3">
+                                    <Input
+                                        value={editName}
+                                        onChange={(e) => setEditName(e.target.value)}
+                                        placeholder="Template name"
+                                    />
+                                    <Input
+                                        value={editDesc}
+                                        onChange={(e) => setEditDesc(e.target.value)}
+                                        placeholder="Description (optional)"
+                                    />
                                 </div>
-                                <Button variant="ghost" size="icon" onClick={() => handleDelete(t.id)}>
-                                    <Trash2 className="w-4 h-4" />
-                                </Button>
+                                <StepTech data={editTech} onChange={setEditTech} />
+                                <div className="flex gap-2 pt-2">
+                                    <Button size="sm" onClick={saveEdit}>Save</Button>
+                                    <Button size="sm" variant="outline" onClick={cancelEdit}>Cancel</Button>
+                                </div>
                             </div>
-                            <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
-                                {Object.entries(FIELD_LABELS).map(([key, label]) => {
-                                    const values = t.tech[key as keyof typeof t.tech] as string[];
-                                    if (!values || values.length === 0) return null;
-                                    return (
-                                        <div key={key}>
-                                            <span className="text-muted-foreground">{label}:</span>{" "}
-                                            {values.map((v) => (
-                                                <Badge key={v} variant="secondary" className="mr-1 mb-1 text-xs">{v}</Badge>
-                                            ))}
-                                        </div>
-                                    );
-                                })}
+                        ) : (
+                            <div key={t.id} className="border rounded-lg p-4 space-y-3 hover:border-primary/40 transition-colors">
+                                <div className="flex items-start justify-between">
+                                    <div>
+                                        <h3 className="font-semibold text-lg">{t.name}</h3>
+                                        {t.description && (
+                                            <p className="text-sm text-muted-foreground">{t.description}</p>
+                                        )}
+                                    </div>
+                                    <div className="flex gap-1">
+                                        <Button variant="ghost" size="icon" onClick={() => startEdit(t)}>
+                                            <Pencil className="w-4 h-4" />
+                                        </Button>
+                                        <Button variant="ghost" size="icon" onClick={() => handleDelete(t.id)}>
+                                            <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                    </div>
+                                </div>
+                                <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+                                    {Object.entries(FIELD_LABELS).map(([key, label]) => {
+                                        const values = t.tech[key as keyof typeof t.tech] as string[];
+                                        if (!values || values.length === 0) return null;
+                                        return (
+                                            <div key={key}>
+                                                <span className="text-muted-foreground">{label}:</span>{" "}
+                                                {values.map((v) => (
+                                                    <Badge key={v} variant="secondary" className="mr-1 mb-1 text-xs">{v}</Badge>
+                                                ))}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                                <p className="text-xs text-muted-foreground">
+                                    Created {new Date(t.createdAt).toLocaleDateString()}
+                                </p>
                             </div>
-                            <p className="text-xs text-muted-foreground">
-                                Created {new Date(t.createdAt).toLocaleDateString()}
-                            </p>
-                        </div>
-                    ))}
+                        )
+                    )}
                 </div>
             )}
             <ConfirmDialog

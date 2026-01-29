@@ -169,7 +169,7 @@ interface CheckboxGroupProps {
     onChange: (selected: string[]) => void;
 }
 
-const AI_DECIDE = "__ai_decide__";
+const AI_DECIDE = "__AI_Decide__";
 
 function CheckboxGroup({
     label,
@@ -237,13 +237,29 @@ function CheckboxGroup({
             <div className="space-y-2">
                 <div className="flex items-center justify-between">
                     <Label>{label}</Label>
-                    <Button variant="ghost" size="sm" onClick={() => setConfirmed(false)}>Edit</Button>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setConfirmed(false)}
+                    >
+                        Edit
+                    </Button>
                 </div>
                 <div className="flex flex-wrap gap-1.5">
-                    {items.length > 0 ? items.map((v) => (
-                        <Badge key={v} variant="secondary" className="text-xs">{v}</Badge>
-                    )) : (
-                        <span className="text-sm text-muted-foreground">None selected</span>
+                    {items.length > 0 ? (
+                        items.map((v) => (
+                            <Badge
+                                key={v}
+                                variant="secondary"
+                                className="text-xs"
+                            >
+                                {v}
+                            </Badge>
+                        ))
+                    ) : (
+                        <span className="text-sm text-muted-foreground">
+                            None selected
+                        </span>
                     )}
                 </div>
             </div>
@@ -326,7 +342,10 @@ const TEMPLATES: Template[] = [
             cicd: ["Vercel", "GitHub Actions"],
             payment: ["Stripe"],
             integrations: ["Resend"],
-            performanceRequirements: ["Low latency (<200ms response)", "Lazy loading / Code splitting"],
+            performanceRequirements: [
+                "Low latency (<200ms response)",
+                "Lazy loading / Code splitting",
+            ],
             authNeeds: ["Email / Password", "OAuth (Google, GitHub, etc.)"],
             authMethod: ["Supabase Auth"],
         },
@@ -360,7 +379,10 @@ const TEMPLATES: Template[] = [
             cicd: ["Docker", "GitHub Actions"],
             payment: ["Stripe"],
             integrations: [],
-            performanceRequirements: ["Low latency (<200ms response)", "CDN / Edge caching"],
+            performanceRequirements: [
+                "Low latency (<200ms response)",
+                "CDN / Edge caching",
+            ],
             authNeeds: ["Email / Password", "OAuth (Google, GitHub, etc.)"],
             authMethod: ["Custom implementation"],
         },
@@ -377,8 +399,15 @@ const TEMPLATES: Template[] = [
             cicd: ["Docker", "GitHub Actions", "AWS (EC2/ECS/Lambda)"],
             payment: [],
             integrations: ["Sentry / Error tracking"],
-            performanceRequirements: ["High throughput (10k+ concurrent users)", "Database indexing & optimization"],
-            authNeeds: ["Email / Password", "OAuth (Google, GitHub, etc.)", "Role-based access control (RBAC)"],
+            performanceRequirements: [
+                "High throughput (10k+ concurrent users)",
+                "Database indexing & optimization",
+            ],
+            authNeeds: [
+                "Email / Password",
+                "OAuth (Google, GitHub, etc.)",
+                "Role-based access control (RBAC)",
+            ],
             authMethod: ["Custom implementation"],
         },
     },
@@ -394,7 +423,10 @@ const TEMPLATES: Template[] = [
             cicd: ["Vercel", "GitHub Actions"],
             payment: ["Stripe"],
             integrations: ["Google Analytics"],
-            performanceRequirements: ["Low latency (<200ms response)", "Real-time updates (WebSockets)"],
+            performanceRequirements: [
+                "Low latency (<200ms response)",
+                "Real-time updates (WebSockets)",
+            ],
             authNeeds: ["Email / Password", "OAuth (Google, GitHub, etc.)"],
             authMethod: ["Firebase Auth"],
         },
@@ -410,9 +442,21 @@ const TEMPLATES: Template[] = [
             storage: ["Vercel Blob"],
             cicd: ["Vercel", "GitHub Actions"],
             payment: ["Stripe"],
-            integrations: ["Resend", "Sentry / Error tracking", "Google Analytics"],
-            performanceRequirements: ["Low latency (<200ms response)", "Rate limiting", "Lazy loading / Code splitting"],
-            authNeeds: ["Email / Password", "OAuth (Google, GitHub, etc.)", "Role-based access control (RBAC)"],
+            integrations: [
+                "Resend",
+                "Sentry / Error tracking",
+                "Google Analytics",
+            ],
+            performanceRequirements: [
+                "Low latency (<200ms response)",
+                "Rate limiting",
+                "Lazy loading / Code splitting",
+            ],
+            authNeeds: [
+                "Email / Password",
+                "OAuth (Google, GitHub, etc.)",
+                "Role-based access control (RBAC)",
+            ],
             authMethod: ["Clerk"],
         },
     },
@@ -437,7 +481,10 @@ export default function StepTech({ data, onChange }: Props) {
 
     useEffect(() => {
         const handleClick = (e: MouseEvent) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+            if (
+                dropdownRef.current &&
+                !dropdownRef.current.contains(e.target as Node)
+            ) {
                 setShowTemplates(false);
             }
         };
@@ -477,35 +524,52 @@ export default function StepTech({ data, onChange }: Props) {
                             size="sm"
                             onClick={() => setShowTemplates(!showTemplates)}
                         >
-                            Use a template <ChevronDown className="w-4 h-4 ml-1" />
+                            Use a template{" "}
+                            <ChevronDown className="w-4 h-4 ml-1" />
                         </Button>
                         {showTemplates && (
                             <div className="absolute right-0 top-full mt-2 w-72 bg-card border rounded-lg shadow-lg z-50 py-1 max-h-96 overflow-y-auto">
                                 {userTemplates.length > 0 && (
                                     <>
-                                        <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wide">My Templates</div>
+                                        <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                                            My Templates
+                                        </div>
                                         {userTemplates.map((t) => (
                                             <button
                                                 key={t.id}
-                                                onClick={() => applyTemplate(t.tech)}
+                                                onClick={() =>
+                                                    applyTemplate(t.tech)
+                                                }
                                                 className="w-full text-left px-4 py-3 hover:bg-accent transition-colors"
                                             >
-                                                <div className="text-sm font-medium">{t.name}</div>
-                                                {t.description && <div className="text-xs text-muted-foreground">{t.description}</div>}
+                                                <div className="text-sm font-medium">
+                                                    {t.name}
+                                                </div>
+                                                {t.description && (
+                                                    <div className="text-xs text-muted-foreground">
+                                                        {t.description}
+                                                    </div>
+                                                )}
                                             </button>
                                         ))}
                                         <div className="border-t my-1" />
                                     </>
                                 )}
-                                <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Presets</div>
+                                <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                                    Presets
+                                </div>
                                 {TEMPLATES.map((t) => (
                                     <button
                                         key={t.name}
                                         onClick={() => applyTemplate(t.tech)}
                                         className="w-full text-left px-4 py-3 hover:bg-accent transition-colors"
                                     >
-                                        <div className="text-sm font-medium">{t.name}</div>
-                                        <div className="text-xs text-muted-foreground">{t.description}</div>
+                                        <div className="text-sm font-medium">
+                                            {t.name}
+                                        </div>
+                                        <div className="text-xs text-muted-foreground">
+                                            {t.description}
+                                        </div>
                                     </button>
                                 ))}
                             </div>
@@ -516,7 +580,9 @@ export default function StepTech({ data, onChange }: Props) {
 
             {showSave && (
                 <div className="border rounded-lg p-4 space-y-3">
-                    <h3 className="font-semibold text-sm">Save current selections as template</h3>
+                    <h3 className="font-semibold text-sm">
+                        Save current selections as template
+                    </h3>
                     <Input
                         placeholder="Template name"
                         value={saveName}
@@ -528,8 +594,20 @@ export default function StepTech({ data, onChange }: Props) {
                         onChange={(e) => setSaveDesc(e.target.value)}
                     />
                     <div className="flex gap-2">
-                        <Button size="sm" onClick={handleSaveTemplate} disabled={!saveName.trim()}>Save</Button>
-                        <Button size="sm" variant="outline" onClick={() => setShowSave(false)}>Cancel</Button>
+                        <Button
+                            size="sm"
+                            onClick={handleSaveTemplate}
+                            disabled={!saveName.trim()}
+                        >
+                            Save
+                        </Button>
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setShowSave(false)}
+                        >
+                            Cancel
+                        </Button>
                     </div>
                 </div>
             )}
