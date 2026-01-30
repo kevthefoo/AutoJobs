@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { FolderOpen, FileEdit, Lightbulb, LayoutTemplate } from "lucide-react";
+import { FolderOpen, FileEdit, Lightbulb, LayoutTemplate, Rocket } from "lucide-react";
 import { useUnsaved } from "@/lib/unsaved-context";
 
 const NAV_ITEMS = [
@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { href: "/drafts", label: "Drafts", icon: FileEdit },
   { href: "/ideas", label: "Ideas", icon: Lightbulb },
   { href: "/templates", label: "Templates", icon: LayoutTemplate },
+  { href: "/productions", label: "Production", icon: Rocket },
 ];
 
 export default function Sidebar() {

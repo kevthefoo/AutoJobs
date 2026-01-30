@@ -35,7 +35,7 @@ export default function TemplatesPage() {
     const [editTech, setEditTech] = useState<ProjectTech | null>(null);
 
     useEffect(() => {
-        setTemplates(getTechTemplates());
+        getTechTemplates().then(setTemplates);
     }, []);
 
     const toggleExpand = (id: string) => {
@@ -50,10 +50,10 @@ export default function TemplatesPage() {
         setDeleteId(id);
     };
 
-    const confirmDelete = () => {
+    const confirmDelete = async () => {
         if (!deleteId) return;
-        deleteTechTemplate(deleteId);
-        setTemplates(getTechTemplates());
+        await deleteTechTemplate(deleteId);
+        setTemplates(await getTechTemplates());
         setDeleteId(null);
         toast.success("Template deleted");
     };
@@ -70,12 +70,12 @@ export default function TemplatesPage() {
         setEditTech(null);
     };
 
-    const saveEdit = () => {
+    const saveEdit = async () => {
         if (!editingId || !editTech) return;
         const t = templates.find((t) => t.id === editingId);
         if (!t) return;
-        saveTechTemplate({ ...t, name: editName.trim() || t.name, description: editDesc.trim(), tech: editTech });
-        setTemplates(getTechTemplates());
+        await saveTechTemplate({ ...t, name: editName.trim() || t.name, description: editDesc.trim(), tech: editTech });
+        setTemplates(await getTechTemplates());
         setEditingId(null);
         setEditTech(null);
         toast.success("Template updated");

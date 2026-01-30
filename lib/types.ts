@@ -97,6 +97,24 @@ export interface TechTemplate {
   createdAt: string;
 }
 
+export interface Production {
+  id: string;
+  name: string;
+  url?: string;
+  platform: string;
+  status: string;
+  version?: string;
+  releaseDate?: string;
+  description?: string;
+  notes: string;
+  screenshotUrls?: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const PLATFORM_OPTIONS = ["App Store", "Play Store", "Web", "Desktop", "Other"] as const;
+export const PRODUCTION_STATUS_OPTIONS = ["live", "beta", "archived", "maintenance"] as const;
+
 export const DEFAULT_WIZARD_DATA: WizardData = {
   basics: {
     name: "",

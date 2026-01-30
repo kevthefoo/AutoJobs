@@ -505,7 +505,7 @@ export default function StepTech({ data, onChange }: Props) {
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        setUserTemplates(getTechTemplates());
+        getTechTemplates().then(setUserTemplates);
     }, []);
 
     useEffect(() => {
@@ -526,10 +526,10 @@ export default function StepTech({ data, onChange }: Props) {
         setShowTemplates(false);
     };
 
-    const handleSaveTemplate = () => {
+    const handleSaveTemplate = async () => {
         if (!saveName.trim()) return;
-        createTechTemplate(saveName.trim(), saveDesc.trim(), data);
-        setUserTemplates(getTechTemplates());
+        await createTechTemplate(saveName.trim(), saveDesc.trim(), data);
+        setUserTemplates(await getTechTemplates());
         setSaveName("");
         setSaveDesc("");
         setShowSave(false);

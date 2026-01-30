@@ -43,22 +43,23 @@ export default function DraftEditPage() {
   }, []);
 
   useEffect(() => {
-    const d = getDraft(params.id as string);
-    if (!d) { router.push("/drafts"); return; }
-    setDraft(d);
-    setData(d.wizardData);
-    setStep(d.currentStep);
+    getDraft(params.id as string).then((d) => {
+      if (!d) { router.push("/drafts"); return; }
+      setDraft(d);
+      setData(d.wizardData);
+      setStep(d.currentStep);
+    });
   }, [params.id, router]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!draft) return;
-    saveDraft({ ...draft, wizardData: data, currentStep: step });
+    await saveDraft({ ...draft, wizardData: data, currentStep: step });
     setDirty(false);
   };
 
-  const handleStepChange = (newStep: number) => {
+  const handleStepChange = async (newStep: number) => {
     setStep(newStep);
-    if (draft) saveDraft({ ...draft, wizardData: data, currentStep: newStep });
+    if (draft) await saveDraft({ ...draft, wizardData: data, currentStep: newStep });
   };
 
   const handleGenerate = async (docTypes: DocType[]) => {
@@ -66,7 +67,7 @@ export default function DraftEditPage() {
     setError("");
 
     try {
-      const project = createProject(data);
+      const project = await createProject(data);
 
       for (const docType of docTypes) {
         const res = await fetch("/api/generate", {
@@ -86,8 +87,8 @@ export default function DraftEditPage() {
       }
 
       project.wizardData = data;
-      saveProject(project);
-      if (draft) deleteDraft(draft.id);
+      await saveProject(project);
+      if (draft) await deleteDraft(draft.id);
       setDirty(false);
       router.push(`/project/${project.id}`);
     } catch (e: any) {

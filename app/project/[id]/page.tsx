@@ -18,13 +18,14 @@ export default function ProjectPage() {
 
   useEffect(() => {
     const id = params.id as string;
-    const p = getProject(id);
-    if (!p) {
-      router.push("/");
-      return;
-    }
-    setProject(p);
-    if (!p.generatedPRD && p.generatedTDD) setActiveTab("tdd");
+    getProject(id).then((p) => {
+      if (!p) {
+        router.push("/");
+        return;
+      }
+      setProject(p);
+      if (!p.generatedPRD && p.generatedTDD) setActiveTab("tdd");
+    });
   }, [params.id, router]);
 
   if (!project) return null;

@@ -39,3 +39,6 @@ next-env.d.ts
 
 # My Memory
 z.txt
+
+# Server-side data storage
+data.json

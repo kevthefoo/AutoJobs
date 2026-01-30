@@ -33,6 +33,7 @@ interface SortableIdeaCardProps {
   setIdeas: (ideas: Idea[]) => void;
   handleUpdate: (idea: Idea) => void;
   handleDelete: (id: string) => void;
+  handleCancelEdit: () => void;
 }
 
 function SortableIdeaCard({
@@ -43,6 +44,7 @@ function SortableIdeaCard({
   setIdeas,
   handleUpdate,
   handleDelete,
+  handleCancelEdit,
 }: SortableIdeaCardProps) {
   const {
     attributes,
@@ -82,7 +84,7 @@ function SortableIdeaCard({
           />
           <div className="flex gap-2">
             <Button size="sm" onClick={() => handleUpdate(idea)}>Save</Button>
-            <Button size="sm" variant="outline" onClick={() => { setEditingId(null); setIdeas(getIdeas()); }}>Cancel</Button>
+            <Button size="sm" variant="outline" onClick={handleCancelEdit}>Cancel</Button>
           </div>
         </div>
       ) : (
@@ -135,37 +137,42 @@ export default function IdeasPage() {
   );
 
   useEffect(() => {
-    setIdeas(getIdeas());
+    getIdeas().then(setIdeas);
   }, []);
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!newTitle.trim()) return;
-    createIdea(newTitle.trim(), newContent.trim());
+    await createIdea(newTitle.trim(), newContent.trim());
     setNewTitle("");
     setNewContent("");
     setShowNew(false);
-    setIdeas(getIdeas());
+    setIdeas(await getIdeas());
   };
 
   const handleDelete = (id: string) => {
     setDeleteId(id);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (!deleteId) return;
-    deleteIdea(deleteId);
-    setIdeas(getIdeas());
+    await deleteIdea(deleteId);
+    setIdeas(await getIdeas());
     setDeleteId(null);
     toast.success("Idea deleted");
   };
 
-  const handleUpdate = (idea: Idea) => {
-    saveIdea(idea);
+  const handleUpdate = async (idea: Idea) => {
+    await saveIdea(idea);
     setEditingId(null);
-    setIdeas(getIdeas());
+    setIdeas(await getIdeas());
   };
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleCancelEdit = async () => {
+    setEditingId(null);
+    setIdeas(await getIdeas());
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
@@ -173,7 +180,7 @@ export default function IdeasPage() {
     const newIndex = ideas.findIndex((i) => i.id === over.id);
     const reordered = arrayMove(ideas, oldIndex, newIndex);
     setIdeas(reordered);
-    saveIdeas(reordered);
+    await saveIdeas(reordered);
   };
 
   return (
@@ -218,6 +225,7 @@ export default function IdeasPage() {
                   setIdeas={setIdeas}
                   handleUpdate={handleUpdate}
                   handleDelete={handleDelete}
+                  handleCancelEdit={handleCancelEdit}
                 />
               ))}
             </div>

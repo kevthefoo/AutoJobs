@@ -19,11 +19,11 @@ export default function DraftsPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
-    setDrafts(getDrafts());
+    getDrafts().then(setDrafts);
   }, []);
 
-  const handleNew = () => {
-    const draft = createDraft();
+  const handleNew = async () => {
+    const draft = await createDraft();
     router.push(`/drafts/${draft.id}`);
   };
 
@@ -31,10 +31,10 @@ export default function DraftsPage() {
     setDeleteId(id);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (!deleteId) return;
-    deleteDraft(deleteId);
-    setDrafts(getDrafts());
+    await deleteDraft(deleteId);
+    setDrafts(await getDrafts());
     setDeleteId(null);
     toast.success("Draft deleted");
   };

@@ -15,17 +15,17 @@ export default function ProjectsPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
-    setProjects(getProjects());
+    getProjects().then(setProjects);
   }, []);
 
   const handleDelete = (id: string) => {
     setDeleteId(id);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (!deleteId) return;
-    deleteProject(deleteId);
-    setProjects(getProjects());
+    await deleteProject(deleteId);
+    setProjects(await getProjects());
     setDeleteId(null);
     toast.success("Project deleted");
   };
