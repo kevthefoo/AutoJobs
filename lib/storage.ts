@@ -133,6 +133,10 @@ export function deleteIdea(id: string): void {
     localStorage.setItem(IDEAS_KEY, JSON.stringify(ideas));
 }
 
+export function saveIdeas(ideas: Idea[]): void {
+    localStorage.setItem(IDEAS_KEY, JSON.stringify(ideas));
+}
+
 // --- Tech Templates ---
 
 export function getTechTemplates(): TechTemplate[] {
